@@ -1,0 +1,120 @@
+name: build
+
+on:
+  push:
+<<<<<<< HEAD
+    branches: [ 'main' ]
+  pull_request:
+    branches: [ 'main' ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+=======
+    branches:
+      - main
+>>>>>>> 4152a58fe6c4a5ea3055b6ba6bb26b86aa12cda0
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+<<<<<<< HEAD
+        go-version: [ '1.21' ]
+    name: Build
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: benjlevesque/short-sha@v2.2
+        id: short-sha
+
+      - name: Install dependencies
+        run: |
+          sudo snap install zig --classic --beta
+          docker pull crazymax/xgo:latest
+          go install github.com/crazy-max/xgo@latest
+          sudo apt install upx
+
+      - name: Build
+        run: |
+          bash build.sh dev
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alist_${{ env.SHA }}
+          path: dist
+=======
+    name: Build
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+
+      - uses: pnpm/action-setup@v2.4.0
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8
+          run_install: false
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: alist-web
+          persist-credentials: false
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Checkout dist repo
+        uses: actions/checkout@v4
+        with:
+          repository: alist-org/web-dist
+          ref: dev
+          path: web-dist
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Build
+        run: |
+          cd alist-web
+          pnpm install
+          pnpm i18n:build
+          pnpm build
+          cd ..
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      - name: Commit dist
+        run: |
+          cd web-dist
+          rm -rf dist
+          cp -r ../alist-web/dist .
+          git add .
+          git config --local user.email "i@nn.ci"
+          git config --local user.name "Noah Hsu"
+          git commit --amend -m "upload dev dist"
+          cd ..
+
+      - name: Upload dist files
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.MY_TOKEN }}
+          branch: dev
+          directory: web-dist
+          repository: alist-org/web-dist
+          force: true
+>>>>>>> 4152a58fe6c4a5ea3055b6ba6bb26b86aa12cda0

@@ -1,0 +1,57 @@
+<<<<<<< HEAD
+.idea/
+.DS_Store
+output/
+/dist/
+
+=======
+<<<<<<< HEAD
+node_modules
+dist
+/src/lang/*
+!/src/lang/en/
+.DS_Store
+.idea
+=======
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+>>>>>>> 4152a58fe6c4a5ea3055b6ba6bb26b86aa12cda0
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+<<<<<<< HEAD
+*.db
+*.bin
+=======
+>>>>>>> 4152a58fe6c4a5ea3055b6ba6bb26b86aa12cda0
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+<<<<<<< HEAD
+/bin/*
+*.json
+/build
+/data/
+/log/
+/lang/
+/daemon/
+/public/dist/*
+/!public/dist/README.md
+
+.VSCodeCounter
+=======
+
+# Go workspace file
+go.work
+>>>>>>> 392efbaf24aac3e411447b445625de8f9d1cac09
+>>>>>>> 4152a58fe6c4a5ea3055b6ba6bb26b86aa12cda0

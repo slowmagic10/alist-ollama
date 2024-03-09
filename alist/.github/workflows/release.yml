@@ -1,0 +1,163 @@
+name: release
+
+on:
+<<<<<<< HEAD
+  release:
+    types: [ published ]
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        platform: [ ubuntu-latest ]
+        go-version: [ '1.21' ]
+    name: Release
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Prerelease
+        uses: irongut/EditRelease@v1.2.0
+        with:
+          token: ${{ secrets.MY_TOKEN }}
+          id: ${{ github.event.release.id }}
+          prerelease: true
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+=======
+  push:
+    tags:
+      - "*"
+
+jobs:
+  changelog:
+    name: Create release changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        run: npx changelogithub # or changelogithub@0.12 if ensure the stable result
+        env:
+          GITHUB_TOKEN: ${{secrets.MY_TOKEN}}
+
+  release:
+    needs: changelog
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+    name: Release
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          registry-url: "https://registry.npmjs.org"
+
+      - uses: pnpm/action-setup@v2.4.0
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8
+          run_install: false
+>>>>>>> 4152a58fe6c4a5ea3055b6ba6bb26b86aa12cda0
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+<<<<<<< HEAD
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo snap install zig --classic --beta
+          docker pull crazymax/xgo:latest
+          go install github.com/crazy-max/xgo@latest
+          sudo apt install upx
+
+      - name: Build
+        run: |
+          bash build.sh release
+
+      - name: Upload assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/compress/*
+          prerelease: false
+
+  release_desktop:
+    needs: release
+    name: Release desktop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          repository: alist-org/desktop-release
+          ref: main
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Add tag
+        run: |
+          git config --local user.email "bot@nn.ci"
+          git config --local user.name "IlaBot"
+          version=$(wget -qO- -t1 -T2 "https://api.github.com/repos/alist-org/alist/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+          git tag -a $version -m "release $version"
+
+      - name: Push tags
+=======
+          ref: main
+          path: alist-web
+          persist-credentials: false
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Checkout dist repo
+        uses: actions/checkout@v4
+        with:
+          repository: alist-org/web-dist
+          ref: main
+          path: web-dist
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Build
+        run: |
+          mv alist-web/release.sh .
+          bash release.sh
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      - name: Publish npm
+        run: |
+          cd alist-web
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          pnpm publish --no-git-checks
+          cd ..
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Upload dist files
+>>>>>>> 4152a58fe6c4a5ea3055b6ba6bb26b86aa12cda0
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.MY_TOKEN }}
+          branch: main
+<<<<<<< HEAD
+          repository: alist-org/desktop-release
+=======
+          directory: web-dist
+          repository: alist-org/web-dist
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: compress/*
+>>>>>>> 4152a58fe6c4a5ea3055b6ba6bb26b86aa12cda0
